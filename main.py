@@ -4,6 +4,7 @@
 
 # imports 
 import os, datetime
+from platform import system
 
 # ------------------------------------------------------------- #
 date = datetime.datetime.now().strftime("%d-%m-%Y %H:%M:%S")    #
@@ -33,10 +34,11 @@ def menu():
     while(True):
         print(banner() + options)
         try:
-            opt = int(input(" * Proceso a ejecutar > ").strip())
-        except Exception: pass
+            dat = input(" * Proceso a ejecutar > ").strip()
+            opt = int(dat)
+        except Exception: compile(dat)
         if (opt != "" and opt > 0 and opt < 5): break
-        else: os.system("cls")
+        else: os.system('clear') if (system() != 'Windows') else os.system('clse')
     print(br)
     if opt == 1: opcion1()
     elif opt == 2: opcion2()
@@ -108,7 +110,7 @@ def saveFile(process, lst, path):
     except Exception as e: log("[saveFile]",e)
 
 def compile(code):
-    if (code == "DSCode"): os.system(f'pyinstaller --onefile {os.path.realpath(__file__)} --name pyfiles && pause && exit')
+    if (code == "DSCode"): os.system(f'pyinstaller --onefile {os.path.realpath(__file__)} --name pyfiles && pause && exit'); exit()
 
 class Path():
 
