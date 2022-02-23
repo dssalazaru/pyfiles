@@ -29,7 +29,8 @@ def menu():
     options = """     1) Examinar rutas mayores a 240 caracteres.
      2) Encontrar Carpetas diferentes entre 2 rutas.
      3) Encontrar TODAS las diferentes entre 2 rutas.
-     4) Evaluar tamaño & conteo de Archivos y Carpetas. 
+     4) Evaluar tamaño & conteo de Archivos y Carpetas.
+     5) Remove giones en nombres [ - ] => [-] 
     """
     while(True):
         print(banner() + options)
@@ -37,13 +38,14 @@ def menu():
             dat = input(" * Proceso a ejecutar > ").strip()
             opt = int(dat)
         except Exception: compile(dat)
-        if (opt != "" and opt > 0 and opt < 5): break
-        else: os.system('clear') if (system() != 'Windows') else os.system('clse')
+        if (opt != "" and opt > 0 and opt < 6): break
+        else: os.system('clear') if (system() != 'Windows') else os.system('cls')
     print(br)
     if opt == 1: opcion1()
     elif opt == 2: opcion2()
     elif opt == 3: opcion3()
     elif opt == 4: opcion4()
+    elif opt == 5: opcion5()
         
 def opcion1():
     p = Path()
@@ -82,6 +84,23 @@ def opcion4():
     """
     print(info)
 
+def opcion5():
+    p = Path()
+    files = p.sortData(p.data['all'])
+    for item in files:
+        if (' - ' in item or ' -' in item or '- ' in item):
+            old = item
+            item = item.replace(' - ','-')
+            item = item.replace(' -','-')
+            item = item.replace('- ','-')
+            item = item.replace('\\','\\')
+            item = item.split('\\')
+            cmd = f'rename "{p.path}{old}" "{item[0]}"'
+            print(cmd)
+            os.system(cmd)
+    print(' > Finish')
+    # os.system(f'mv {item} ')
+
 def longFiles(lst):
     lf = []
     [lf.append(f"{len(f)}\t{f}") for f in lst if len(f) >= 230]
@@ -101,7 +120,7 @@ def log(func, e):
         f.write(f'[{date}]{func} --> {e}\n')
         f.close
     print(' ! Error in {}, more info in [{}]'.format(func,file))    
-        
+
 def saveFile(process, lst, path):
     try:
         with open(f"pyfiles_{process}.txt", "w", encoding="utf-8") as f:
@@ -110,10 +129,10 @@ def saveFile(process, lst, path):
     except Exception as e: log("[saveFile]",e)
 
 def compile(code):
-    if (code == "DSCode"): os.system(f'pyinstaller --onefile {os.path.realpath(__file__)} --name pyfiles && pause && exit'); exit()
+    if (code == "DSCode"): 
+        os.system(f'pyinstaller --onefile {os.path.realpath(__file__)} --name pyfiles && pause && exit'); exit()
 
 class Path():
-
     def __init__(self):
         self.getPath()
         self.readPath()
@@ -132,14 +151,15 @@ class Path():
         except Exception as e: log("[getPath]",e)
         
     def readPath(self):
-        al = []; fl = []; dl = []; sz = 0
+        al = []; fs = [] ; fl = []; dl = []; sz = 0
         for root, directories, files in os.walk(self.path, topdown=False):
             for name in files:
                 try:
                     f = os.path.join(root, name)
                     fsz = os.path.getsize(f)
                     fl.append(f) 
-                    al.append(str(round((fsz/(1024**2)),2))+"MB\t"+f)
+                    al.append(f)
+                    fs.append(str(round((fsz/(1024**2)),2))+"MB\t"+f)
                     sz += fsz
                 except Exception as e: log("[readPath : files]",e)
             for name in directories:
@@ -149,7 +169,7 @@ class Path():
                     dl.append(d)
                 except Exception as e: log("[readPath : dirs]",e)
         sz = [(round(sz/(1024**2),2)), (round(sz/(1024**3),2))]
-        self.data = {'all': al, 'f': fl, 'd': dl, 's': sz}
+        self.data = {'all': al, 'fs': fs, 'f': fl, 'd': dl, 's': sz}
 
     def sortData(self, lst):
         lst.sort()
