@@ -99,7 +99,6 @@ def opcion5():
             print(cmd)
             os.system(cmd)
     print(' > Finish')
-    # os.system(f'mv {item} ')
 
 def longFiles(lst):
     lf = []
@@ -158,18 +157,16 @@ class Path():
                     f = os.path.join(root, name)
                     fsz = os.path.getsize(f)
                     fl.append(f) 
-                    al.append(f)
                     fs.append(str(round((fsz/(1024**2)),2))+"MB\t"+f)
                     sz += fsz
                 except Exception as e: log("[readPath : files]",e)
             for name in directories:
                 try:
                     d = os.path.join(root, name)
-                    al.append(d)
                     dl.append(d)
                 except Exception as e: log("[readPath : dirs]",e)
         sz = [(round(sz/(1024**2),2)), (round(sz/(1024**3),2))]
-        self.data = {'all': al, 'fs': fs, 'f': fl, 'd': dl, 's': sz}
+        self.data = {'all': fl + dl, 'fs': fs, 'f': fl, 'd': dl, 's': sz}
 
     def sortData(self, lst):
         lst.sort()
