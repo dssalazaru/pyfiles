@@ -10,8 +10,12 @@ from platform import system
 from subprocess import Popen as execute
 from subprocess import PIPE
 from time import sleep
+from types import NoneType
 
 con = 'powershell' if system().lower() == 'windows' else 'bash'
+exp = ('-', '_')
+# exp = (' - ', ' -', '- ')
+
 
 # ------------------------------------------------------------- #
 date = datetime.now().strftime("%d-%m-%Y %H:%M:%S")    #
@@ -24,34 +28,52 @@ path = 'C:\\data\\test2\\'
 # Main function
 def main():
     # Stating date and log file
-    log(f'[Running {ver}]', ('--> '*15) + '\n')
+    # log(f'[Running {ver}]', ('--> '*15) + '\n')
     # Start program loop
-    ls = lsPath(path)
-    test(ls)
+    data = lsPath(path)
+    # print(ls)
+    # list(map(lambda l: updateFiles(l), data))
     # menu()
     # End of the program
     input("\n # Done, pulse cualquier tecla para salir...")
 
-def test(data):
+
+# =======================================================================================
+    
+def lsPath(path):
+    o, e = execute([con, 'ls', '-Path', path, '-n', '-r'], stdout=PIPE, stderr=PIPE).communicate()
+    if not e:
+        files = str(o).replace("b'",'').replace("'",'').split('\\r\\n')
+        files = [item for item in reversed(files) if item]
+        # data.append(files) if len(files) != 0 else None
+        print(filter(map()))
+    else: return '[error] al listar los archivos'
+    return None
+
+def updateFiles(data):
     for item in data: # Read every item from all list
         ndx = subItems = oldItem = nfile = ''
         oldItem = path + item.replace('\\\\', '\\')
-        subItems = item.split('\\\\') # Split every path in list of dirs and file
+        # Split every path in list of dirs and file
+        subItems = item.split('\\\\') if '\\\\' in item else item
+        print(subItems)
         if type(subItems) == list:
             ndx = len(subItems) - 1
-            if (' - ' in subItems[ndx] or ' -' in subItems[ndx] or '- ' in subItems[ndx]):
+            if ([e for e in exp] in subItems[ndx]):
                 ofile = subItems[ndx]
                 nfile = expFilter(ofile)
             else: end = True; pass
             nfile = nfile if ndx == 0 else '\\' + nfile
             subItems.pop()
-        if end: continue
+        elif type(subItems) == str: continue
         newItem = path + '\\'.join(subItems) + nfile
         print('Hey')
         o, e = execute([con, 'mv', '"'+oldItem+'"', '"'+newItem+'"'], stdout=PIPE, stderr=PIPE).communicate()
         if not e:
             print(f' [Done] {ofile} -> {nfile}')
         else: log('[Updating files]', oldItem + ' : ' + ofile + ' -> ' + nfile)
+
+# =======================================================================================
 
 def expFilter(item):
     nfile = item.replace(' - ','-')
@@ -168,26 +190,6 @@ def saveFile(process, lst, path):
 def compile(code):
     if (code == "DSCode"): 
         os.system(f'pyinstaller --onefile {mainPath} --name pyfiles && pause && exit'); exit()
-
-# =======================================================================================
-
-# def main():
-    # lsPath()
-    # print(dirs)
-    # files = readPath('.')
-    # renameFiles(files['al'])
-    # files = readPath('.')
-    # formatFile(files['fl'], ' * ', '# ')
-    
-def lsPath(path):
-    o, e = execute([con, 'ls', '-Path', path, '-n', '-r'], stdout=PIPE, stderr=PIPE).communicate()
-    if not e:
-        files = str(o).replace("b'",'').replace("'",'').split('\\r\\n')
-        files = [item for item in reversed(files) if item]
-        return files
-    else: return '[error] al listar los archivos'
-
-# =======================================================================================
 
 class Path():
     def __init__(self):
