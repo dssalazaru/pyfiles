@@ -3,57 +3,59 @@
 # -------------------------------------------------------- #
 
 # imports 
-from operator import sub
 import os
 from datetime import datetime
 from platform import system
 from subprocess import Popen as execute
 from subprocess import PIPE
 from time import sleep
-from types import NoneType
-
-con = 'powershell' if system().lower() == 'windows' else 'bash'
-exp = ('-', '_')
-# exp = (' - ', ' -', '- ')
-
 
 # ------------------------------------------------------------- #
-date = datetime.now().strftime("%d-%m-%Y %H:%M:%S")    #
+date = datetime.now().strftime("%d-%m-%Y %H:%M:%S")             #
 mainPath = os.path.realpath(__file__)                           #
 name, by, ver = "Python File Manager", "@dssalazaru", "v3.0"    #
 br = f"\n{'-'*(len(name) + len(by) + len(ver) + 17)}\n"         #
 # ------------------------------------------------------------- #
-path = 'C:\\data\\test2\\'
+
+con = 'powershell' if system().lower() == 'windows' else 'bash'
+exp1 = (' - ', ' -', '- ')
+path = '"C:\\data\\test - copia' + '\\"'
 
 # Main function
 def main():
+    print(mainPath)
     # Stating date and log file
     # log(f'[Running {ver}]', ('--> '*15) + '\n')
     # Start program loop
-    data = lsPath(path)
+    lsPath(path)
     # print(ls)
     # list(map(lambda l: updateFiles(l), data))
     # menu()
     # End of the program
-    input("\n # Done, pulse cualquier tecla para salir...")
+    # input("\n # Done, pulse cualquier tecla para salir...")
 
 
 # =======================================================================================
     
 def lsPath(path):
-    o, e = execute([con, 'ls', '-Path', path, '-n', '-r'], stdout=PIPE, stderr=PIPE).communicate()
-    if not e:
-        files = str(o).replace("b'",'').replace("'",'').split('\\r\\n')
-        files = [item for item in reversed(files) if item]
-        # data.append(files) if len(files) != 0 else None
-        print(filter(map()))
-    else: return '[error] al listar los archivos'
-    return None
+    try:
+        o, e = execute([con, 'ls', '-Path', path, '-n', '-r'], stdout=PIPE, stderr=PIPE).communicate()
+        if not e:
+            files = str(o).replace("b'",'').replace("'",'').replace('\\\\', '\\').split('\\r\\n')
+            files = [item for item in reversed(files) if item]
+            # print(files)
+            print(list(map(lambda files,exp: exp in files, files,exp1)))
+    except Exception as e: log('[error] al listar los archivos',e)
+
+def catchExp(lst, exp):
+    for item in lst:
+        for e in exp:
+            pass
 
 def updateFiles(data):
     for item in data: # Read every item from all list
         ndx = subItems = oldItem = nfile = ''
-        oldItem = path + item.replace('\\\\', '\\')
+        oldItem = path + item
         # Split every path in list of dirs and file
         subItems = item.split('\\\\') if '\\\\' in item else item
         print(subItems)
@@ -182,7 +184,7 @@ def log(func, e):
 
 def saveFile(process, lst, path):
     try:
-        with open(f"pyfiles_{process}.txt", "w", encoding="utf-8") as f:
+        with open(f"{mainPath}\\pyfiles_{process}.txt", "w", encoding="utf-8") as f:
             f.write(f'[{date}] {path}\n')
             [f.writelines(f"{line}\n") for line in lst]
     except Exception as e: log("[saveFile]",e)
