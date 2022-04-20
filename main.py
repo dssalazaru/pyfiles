@@ -2,32 +2,37 @@
 # |   Python File Manager  |  Python Script by dssu.me   | #
 # -------------------------------------------------------- #
 
-# imports 
-import os
-from datetime import datetime
-from platform import system
-from subprocess import Popen as execute
-from subprocess import PIPE
-from time import sleep
+# imports
 
-# ------------------------------------------------------------- #
-date = datetime.now().strftime("%d-%m-%Y %H:%M:%S")             #
-mainPath = os.path.realpath(__file__)                           #
-name, by, ver = "Python File Manager", "@dssalazaru", "v3.0"    #
-br = f"\n{'-'*(len(name) + len(by) + len(ver) + 17)}\n"         #
-# ------------------------------------------------------------- #
+from src import Path, Debug, Utils, Pyfiles
 
-con = 'powershell' if system().lower() == 'windows' else 'bash'
-exp1 = (' - ', ' -', '- ')
-path = '"C:\\data\\test - copia' + '\\"'
+
+        # try:
+        #     if not e:
+        #         # files = str(o).replace("b'",'').replace("'",'').replace('\\\\', '\\').split('\\r\\n')
+        #         files = [item for item in reversed(files) if item]
+        #         # print(files)
+        #         # print(list(map(lambda files,exp: exp in files, files,exp1)))
+        # except Exception as e: Logger.log('[error] al listar los archivos',e)
+        
+
 
 # Main function
 def main():
-    print(mainPath)
+    mode = Debug(True)  
+    
+    if mode.isEnabled():
+        Pyfiles()
+    else: 
+        menu()
+    
+    
+    
+    
     # Stating date and log file
     # log(f'[Running {ver}]', ('--> '*15) + '\n')
     # Start program loop
-    lsPath(path)
+    # lsPath(path)
     # print(ls)
     # list(map(lambda l: updateFiles(l), data))
     # menu()
@@ -35,57 +40,6 @@ def main():
     # input("\n # Done, pulse cualquier tecla para salir...")
 
 
-# =======================================================================================
-    
-def lsPath(path):
-    try:
-        o, e = execute([con, 'ls', '-Path', path, '-n', '-r'], stdout=PIPE, stderr=PIPE).communicate()
-        if not e:
-            files = str(o).replace("b'",'').replace("'",'').replace('\\\\', '\\').split('\\r\\n')
-            files = [item for item in reversed(files) if item]
-            # print(files)
-            print(list(map(lambda files,exp: exp in files, files,exp1)))
-    except Exception as e: log('[error] al listar los archivos',e)
-
-def catchExp(lst, exp):
-    for item in lst:
-        for e in exp:
-            pass
-
-def updateFiles(data):
-    for item in data: # Read every item from all list
-        ndx = subItems = oldItem = nfile = ''
-        oldItem = path + item
-        # Split every path in list of dirs and file
-        subItems = item.split('\\\\') if '\\\\' in item else item
-        print(subItems)
-        if type(subItems) == list:
-            ndx = len(subItems) - 1
-            if ([e for e in exp] in subItems[ndx]):
-                ofile = subItems[ndx]
-                nfile = expFilter(ofile)
-            else: end = True; pass
-            nfile = nfile if ndx == 0 else '\\' + nfile
-            subItems.pop()
-        elif type(subItems) == str: continue
-        newItem = path + '\\'.join(subItems) + nfile
-        print('Hey')
-        o, e = execute([con, 'mv', '"'+oldItem+'"', '"'+newItem+'"'], stdout=PIPE, stderr=PIPE).communicate()
-        if not e:
-            print(f' [Done] {ofile} -> {nfile}')
-        else: log('[Updating files]', oldItem + ' : ' + ofile + ' -> ' + nfile)
-
-# =======================================================================================
-
-def expFilter(item):
-    nfile = item.replace(' - ','-')
-    nfile = nfile.replace(' -','-')
-    nfile = nfile.replace('- ','-')
-    return nfile
-
-def banner():
-    return f"{br}\t{name} {by} {ver}{br}"
-    
 def menu():
     opt = 0
     options = """     1) Examinar rutas mayores a 240 caracteres.
@@ -95,154 +49,29 @@ def menu():
      5) Remove giones en nombres [ - ] => [-] 
     """
     while(True):
-        print(banner() + options)
+        Utils.Banner('print')
+        print(options)
         try:
             dat = input(" * Proceso a ejecutar > ").strip()
             opt = int(dat)
-        except Exception: compile(dat)
+        except Exception: None
         if (opt != "" and opt > 0 and opt < 6): break
-        else: os.system('clear') if (system() != 'Windows') else os.system('cls')
-    print(br)
-    if opt == 1: opcion1()
-    elif opt == 2: opcion2()
-    elif opt == 3: opcion3()
-    elif opt == 4: opcion4()
-    elif opt == 5: opcion5()
+        else: print('\n\n')
+    Utils.Banner('br')
+    if opt == 1: Pyfiles.Opcion1()
+    # elif opt == 2: opcion2()
+    # elif opt == 3: opcion3()
+    # elif opt == 4: opcion4()
+    # elif opt == 5: opcion5()
         
-def opcion1():
-    p = Path()
-    lf = longFiles(p.data['f'])
-    saveFile("long", lf, p.path)
 
-def opcion2():
-    print(" Ingrese la Ruta #1")
-    p1 = Path()
-    print(" Ingrese la Ruta #2")
-    p2 = Path()
-    dir1 = p1.sortData(p1.data['d'])
-    dir2 = p2.sortData(p2.data['d'])
-    diff = compare(dir1, dir2)
-    saveFile("dir1", diff[0], p1.path)
-    saveFile("dir2", diff[1], p2.path)
-    
-def opcion3():
-    print(" Ingrese la Ruta #1")
-    p1 = Path()
-    print(" Ingrese la Ruta #2")
-    p2 = Path()
-    all1 = p1.sortData(p1.data['all'])
-    all2 = p2.sortData(p2.data['all'])
-    diff = compare(all1, all2)
-    saveFile("files1", diff[0], p1.path)
-    saveFile("files2", diff[1], p2.path)
-    
-def opcion4():
-    p = Path()
-    f, d = len(p.data['f']), len(p.data['d'])
-    info = f"""
-  > Path\t\t{p.path}
-  > Total Size\t\t{p.data['s'][0]}MB\t|  {p.data['s'][1]}GB
-  > Files/Dirs\t\t{f}/{d}\t|  All: {(f + d)}
-    """
-    print(info)
-
-def opcion5():
-    p = Path()
-    files = p.sortData(p.data['all'])
-    for item in files:
-        if (' - ' in item or ' -' in item or '- ' in item):
-            old = item
-            item = item.replace(' - ','-')
-            item = item.replace(' -','-')
-            item = item.replace('- ','-')
-            item = item.replace('\\','\\')
-            item = item.split('\\')
-            cmd = f'rename "{p.path}{old}" "{item[0]}"'
-            print(cmd)
-            os.system(cmd)
-    print(' > Finish')
 
 def longFiles(lst):
     lf = []
     [lf.append(f"{len(f)}\t{f}") for f in lst if len(f) >= 230]
     return lf
 
-def compare(l1, l2):
-    lst1 = []; lst2 = []
-    [lst1.append("Not in [Ruta#1]\t" + i2) for i2 in l2 if i2 not in l1]
-    [lst2.append("Not in [Ruta#2]\t" + i1) for i1 in l1 if i1 not in l2]
-    return [lst1, lst2]
 
-def log(func, e):
-    file = 'pyfiles_events.log'
-    if os.path.isfile(file): mode = 'a'
-    else: mode = 'w'
-    with open(file, mode, encoding="utf-8") as f:
-        f.write(f'[{date}]{func} --> {e}\n')
-        f.close
-    print(f' ! [Debug][{date}]{func}, more info in [{file}]')    
-
-def saveFile(process, lst, path):
-    try:
-        with open(f"{mainPath}\\pyfiles_{process}.txt", "w", encoding="utf-8") as f:
-            f.write(f'[{date}] {path}\n')
-            [f.writelines(f"{line}\n") for line in lst]
-    except Exception as e: log("[saveFile]",e)
-
-def compile(code):
-    if (code == "DSCode"): 
-        os.system(f'pyinstaller --onefile {mainPath} --name pyfiles && pause && exit'); exit()
-
-class Path():
-    def __init__(self):
-        self.getPath()
-        self.readPath()
-        try:
-            tmp = list(map(self.checkDup, [lst for lst in list(self.data.values())]))
-            self.data = {'all': tmp[0], 'f': tmp[1], 'd': tmp[2], 's': tmp[3]}
-        except Exception as e: log('[Class: Path] data not fetch', e)
-            
-    def getPath(self):
-        try:
-            while(True):
-                path = input(" * Ruta: ").strip()
-                if(path == "."): self.path = os.path.dirname(os.path.realpath(__file__)); break
-                elif(path != ""): self.path = path; break
-            print(br)
-        except Exception as e: log("[getPath]",e)
-        
-    def readPath(self):
-        al = []; fs = [] ; fl = []; dl = []; sz = 0
-        for root, directories, files in os.walk(self.path, topdown=False):
-            for name in files:
-                try:
-                    f = os.path.join(root, name)
-                    fsz = os.path.getsize(f)
-                    fl.append(f) 
-                    fs.append(str(round((fsz/(1024**2)),2))+"MB\t"+f)
-                    sz += fsz
-                except Exception as e: log("[readPath : files]",e)
-            for name in directories:
-                try:
-                    d = os.path.join(root, name)
-                    dl.append(d)
-                except Exception as e: log("[readPath : dirs]",e)
-        sz = [(round(sz/(1024**2),2)), (round(sz/(1024**3),2))]
-        self.data = {'all': fl + dl, 'fs': fs, 'f': fl, 'd': dl, 's': sz}
-
-    def sortData(self, lst):
-        lst.sort()
-        return [i.replace(self.path, '') for i in lst]
-    
-    def checkDup(self, lst):
-        try:
-            if (type(lst) != 'list'): return lst
-            for line in lst: 
-                if lst.count(line) > 1:
-                    print(" * Duplicado: ",line)
-                    lst.remove(line)
-            return lst 
-        except Exception as e: log("[checkDup]",e)
     
 # Run program
 if __name__ == "__main__":
